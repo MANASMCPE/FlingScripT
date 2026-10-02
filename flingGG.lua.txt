@@ -1,0 +1,1940 @@
+local players = game:GetService("Players")
+local runService = game:GetService("RunService")
+local workspaceService = game:GetService("Workspace")
+local httpService = game:GetService("HttpService")
+local textChatService = game:GetService("TextChatService")
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local localPlayer = players.LocalPlayer
+local rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+local theme = {
+  TextColor = Color3.fromRGB(210, 210, 215),
+  Background = Color3.fromRGB(10, 10, 12),
+  Topbar = Color3.fromRGB(15, 15, 18),
+  Shadow = Color3.fromRGB(5, 5, 6),
+  NotificationBackground = Color3.fromRGB(18, 18, 22),
+  NotificationActionsBackground = Color3.fromRGB(55, 55, 65),
+  TabBackground = Color3.fromRGB(13, 13, 16),
+  TabStroke = Color3.fromRGB(38, 38, 45),
+  TabBackgroundSelected = Color3.fromRGB(32, 32, 40),
+  TabTextColor = Color3.fromRGB(120, 120, 135),
+  SelectedTabTextColor = Color3.fromRGB(220, 220, 230),
+  ElementBackground = Color3.fromRGB(18, 18, 22),
+  ElementBackgroundHover = Color3.fromRGB(28, 28, 35),
+  SecondaryElementBackground = Color3.fromRGB(12, 12, 15),
+  ElementStroke = Color3.fromRGB(40, 40, 50),
+  SecondaryElementStroke = Color3.fromRGB(28, 28, 35),
+  SliderBackground = Color3.fromRGB(22, 22, 28),
+  SliderProgress = Color3.fromRGB(140, 140, 165),
+  SliderStroke = Color3.fromRGB(60, 60, 75),
+  ToggleBackground = Color3.fromRGB(18, 18, 22),
+  ToggleEnabled = Color3.fromRGB(130, 130, 155),
+  ToggleDisabled = Color3.fromRGB(35, 35, 42),
+  ToggleEnabledStroke = Color3.fromRGB(170, 170, 195),
+  ToggleDisabledStroke = Color3.fromRGB(50, 50, 60),
+  ToggleEnabledOuterStroke = Color3.fromRGB(110, 110, 135),
+  ToggleDisabledOuterStroke = Color3.fromRGB(25, 25, 32),
+  DropdownSelected = Color3.fromRGB(28, 28, 36),
+  DropdownUnselected = Color3.fromRGB(18, 18, 22),
+  InputBackground = Color3.fromRGB(14, 14, 18),
+  InputStroke = Color3.fromRGB(45, 45, 55),
+  PlaceholderColor = Color3.fromRGB(80, 80, 95),
+}
+
+local v1 = {
+  FlingEnabled = false,
+  FlingMode = "off",
+  SingleTarget = "",
+  SpecificTargets = {},
+  Whitelist = {},
+  ProtectNew = false,
+  ProtectFriends = false,
+  CurrentIndex = 1,
+  StartTime = nil,
+  MaxTime = 5,
+  KillMsgs = {},
+  KillMsgAtivo = false,
+  KillMsgIA = false,
+  IAStyle = "funny",
+  IALang = "English",
+  IACiteNames = true,
+  IAUseRandom = false,
+  IAExtraContext = "",
+  ManualGod = false,
+  AntiGod = false,
+  AntiSit = false,
+  NoCollide = false,
+  AntiFling = false,
+}
+
+getgenv().FPDH = workspace.FallenPartsDestroyHeight
+
+local function f1(p1)
+  if type(p1) == "table" then
+    return p1[1]
+  end
+
+  return p1
+end
+
+local function f2(title, content, p2)
+  rayfield:Notify({
+    Title = title,
+    Content = content,
+    Duration = 3,
+    Image = p2 or "info",
+  })
+end
+
+local function f3()
+  local v2 = {}
+
+  for index, value in ipairs(players:GetPlayers()) do
+    if value ~= localPlayer then
+      table.insert(v2, value.Name)
+    end
+  end
+
+  if #v2 == 0 then
+    table.insert(v2, "(no players)")
+  end
+
+  return v2
+end
+
+local maxHealth = 100
+local v3 = {}
+
+local function f4()
+  local character = localPlayer.Character
+  local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+  if not humanoid then
+    return
+  end
+
+  maxHealth = humanoid.MaxHealth > 0 and humanoid.MaxHealth < math.huge and humanoid.MaxHealth
+    or 100
+
+  humanoid.MaxHealth = math.huge
+  humanoid.Health = math.huge
+  humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+  humanoid.BreakJointsOnDeath = false
+end
+
+local function f5()
+  local character2 = localPlayer.Character
+  local humanoid2 = character2 and character2:FindFirstChildOfClass("Humanoid")
+
+  if not humanoid2 then
+    return
+  end
+
+  humanoid2:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+  humanoid2.BreakJointsOnDeath = true
+  humanoid2.MaxHealth = maxHealth
+  humanoid2.Health = maxHealth
+end
+
+local function f6(p3, p4)
+  v3[p3] = p4 or nil
+
+  if next(v3) ~= nil then
+    f4()
+  else
+    f5()
+  end
+end
+
+localPlayer.CharacterAdded:Connect(function()
+  task.wait(1)
+
+  if next(v3) ~= nil then
+    f4()
+  end
+end)
+
+local v4 = {}
+
+local function f7(p5)
+  if p5:IsA("BasePart") and p5.CanCollide then
+    p5.CanCollide = false
+  end
+end
+
+local function f8(p6)
+  for key, value2 in pairs(p6:GetChildren()) do
+    f7(value2)
+  end
+
+  p6.ChildAdded:Connect(function(child)
+    if v1.AntiFling then
+      f7(child)
+    end
+  end)
+end
+
+local function f9(p7)
+  if p7 == localPlayer then
+    return
+  end
+
+  if p7.Character then
+    f8(p7.Character)
+  end
+
+  p7.CharacterAdded:Connect(function(character3)
+    if v1.AntiFling then
+      f8(character3)
+    end
+  end)
+
+  v4[p7] = true
+end
+
+for key2, value3 in pairs(players:GetPlayers()) do
+  f9(value3)
+end
+
+players.PlayerAdded:Connect(f9)
+
+runService.RenderStepped:Connect(function()
+  if not v1.AntiFling then
+    return
+  end
+
+  for key3, value4 in pairs(v4) do
+    local character4 = key3.Character
+
+    if character4 then
+      for key4, value5 in pairs(character4:GetChildren()) do
+        f7(value5)
+      end
+    end
+  end
+end)
+
+local stepped = runService.Stepped
+
+local function f10(p8)
+  local v5 = p8
+
+  if not v5 or v5 == "" then
+    return
+  end
+
+  if #v5 > 200 then
+    v5 = v5:sub(1, 197) .. "..."
+  end
+
+  if not pcall(function()
+    replicatedStorage:WaitForChild("DefaultChatSystemChatEvents", 3):WaitForChild(
+      "SayMessageRequest", 3
+    ):FireServer(
+      v5, "All"
+    )
+  end) then
+    pcall(function()
+      local findFirstChild = textChatService:FindFirstChild("RBXGeneral", true)
+
+      if findFirstChild then
+        findFirstChild:SendAsync(v5)
+      end
+    end)
+  end
+end
+
+stepped:Connect(function()
+  if not v1.NoCollide then
+    return
+  end
+
+  if not localPlayer.Character then
+    return
+  end
+
+  for key5, value6 in pairs(localPlayer.Character:GetDescendants()) do
+    if value6:IsA("BasePart") then
+      value6.CanCollide = false
+    end
+  end
+end)
+
+runService.Heartbeat:Connect(function()
+  pcall(function()
+    local character5 = localPlayer.Character
+
+    if not character5 then
+      return
+    else
+      local humanoid3 = character5:FindFirstChildOfClass("Humanoid")
+
+      if not humanoid3 then
+        return
+      end
+
+      if v1.AntiGod then
+        humanoid3.Health = 100
+        humanoid3:SetStateEnabled(15, false)
+      end
+
+      if v1.AntiSit then
+        humanoid3.Sit = false
+      end
+
+      if humanoid3:GetState() == Enum.HumanoidStateType.Dead then
+        humanoid3:ChangeState(11)
+      end
+
+      return
+    end
+  end)
+end)
+
+local connect, f11
+
+local function f12()
+  if connect then
+    connect:Disconnect()
+  end
+
+  local character6 = localPlayer.Character
+
+  if not character6 then
+    return
+  end
+
+  for index2, value7 in ipairs(character6:GetDescendants()) do
+    local v6 = value7
+
+    if f11(v6) then
+      pcall(function() v6:Destroy() end)
+    end
+  end
+
+  connect = character6.DescendantAdded:Connect(function(descendant)
+    if f11(descendant) then
+      pcall(function() descendant:Destroy() end)
+    end
+  end)
+end
+
+function f11(p9)
+  if not (p9:IsA("Decal") or p9:IsA("Texture")) then
+    return false
+  elseif p9.Name == "face" then
+    return false
+  else
+    return p9.Parent and p9.Parent:IsA("BasePart")
+  end
+end
+
+f12()
+
+localPlayer.CharacterAdded:Connect(function()
+  task.wait(0.5)
+  f12()
+end)
+
+local v7 = false
+local v8
+
+local function f13()
+  v7 = true
+
+  v8 = task.spawn(function()
+    while v7 do
+      local billboardBalloon = workspaceService:FindFirstChild("BillboardBalloon")
+      local billboardApple = workspaceService:FindFirstChild("BillboardApple")
+
+      for index3, value8 in ipairs({
+        billboardBalloon and billboardBalloon:FindFirstChild("Board")
+          and billboardBalloon.Board:FindFirstChildOfClass("ClickDetector"),
+        billboardApple and billboardApple:FindFirstChild("Board")
+          and billboardApple.Board:FindFirstChildOfClass("ClickDetector"),
+      }) do
+        local v9 = value8
+
+        if v9 then
+          task.spawn(function()
+            for i = 1, 25000 do
+              if not v7 then
+                break
+              end
+
+              fireclickdetector(v9)
+
+              if i % 50 == 0 then
+                task.wait()
+              end
+            end
+          end)
+        end
+      end
+
+      for j = 1, math.random(15, 25) * 10 do
+        if not v7 then
+          break
+        end
+
+        task.wait(0.1)
+      end
+    end
+  end)
+end
+
+local function f14()
+  v7 = false
+
+  if v8 then
+    task.cancel(v8)
+    v8 = nil
+  end
+end
+
+local enableTornado = false
+local v10 = {}
+
+local function f15()
+  if getgenv().TornadoNetworkInit then
+    return
+  else
+    getgenv().TornadoNetworkInit = true
+    local instance = Instance.new("Folder", workspaceService)
+    local instance2 = Instance.new("Part", instance)
+    Instance.new("Attachment", instance2)
+
+    instance2.Anchored = true
+    instance2.CanCollide = false
+    instance2.Transparency = 1
+
+    if not getgenv().Network then
+      getgenv().Network = { BaseParts = {}, Velocity = Vector3.new(14.46, 14.46, 14.46) }
+      localPlayer.ReplicationFocus = workspaceService
+
+      runService.Heartbeat:Connect(function()
+        pcall(function() sethiddenproperty(localPlayer, "SimulationRadius", math.huge) end)
+
+        for index4, value9 in ipairs(getgenv().Network.BaseParts) do
+          if value9:IsDescendantOf(workspaceService) then
+            value9.Velocity = getgenv().Network.Velocity
+          end
+        end
+      end)
+    end
+
+    for index5, value10 in ipairs(workspaceService:GetDescendants()) do
+    end
+
+    workspaceService.DescendantAdded:Connect(function(descendant2) end)
+
+    workspaceService.DescendantRemoving:Connect(function(descendant3)
+      local v11 = table.find(v10, descendant3)
+
+      if v11 then
+        table.remove(v10, v11)
+      end
+    end)
+
+    runService.Heartbeat:Connect(function()
+      if not enableTornado then
+        return
+      else
+        local character7 = localPlayer.Character
+        local humanoidRootPart = character7 and character7:FindFirstChild("HumanoidRootPart")
+
+        if not humanoidRootPart then
+          return
+        else
+          local position = humanoidRootPart.Position
+
+          for index6, value11 in ipairs(v10) do
+            if value11.Parent and not value11.Anchored then
+              local position2 = value11.Position
+
+              local v12 = math.atan2(position2.Z - position.Z, position2.X - position.X)
+                + math.rad(10)
+
+              local v13 = math.min(
+                50, (Vector3.new(position2.X, position.Y, position2.Z) - position).Magnitude
+              )
+
+              local v14 = math.cos(v12)
+              local v15 = math.abs(math.sin((position2.Y - position.Y) / 100))
+              local v16 = math.sin(v12)
+
+              value11.Velocity = (Vector3.new(
+                position.X + v14 * v13, position.Y + 100 * v15, position.Z + v16 * v13
+              ) - position2).Unit * 1000
+            end
+          end
+
+          return
+        end
+      end
+    end)
+
+    return
+  end
+end
+
+f15()
+
+local function f16(p10, fn)
+  task.spawn(function()
+    local v17 = {
+      funny = "funny and playful",
+      aggressive = "aggressive and taunting (no heavy slurs)",
+      humiliating = "mocking and sarcastic",
+      epic = "epic and dramatic like a battle narrator",
+      friendly = "sportsmanlike and friendly",
+    }
+
+    local v18 = ({
+      English = "in English",
+      Portuguese = "in Brazilian Portuguese (pt-BR)",
+      Spanish = "in Spanish",
+      French = "in French",
+      German = "in German",
+      Japanese = "in Japanese",
+      Chinese = "in Simplified Chinese",
+    })[v1.IALang] or "in English"
+
+    local v19 = v17[v1.IAStyle] or "funny and playful"
+
+    local iaCiteNames = v1.IACiteNames
+        and "IMPORTANT: to reference the player write ONLY the token @user. For display name use @displayuser. "
+      or "Do NOT mention any player names or usernames. "
+
+    local iaUseRandom = v1.IAUseRandom
+        and "Include the token @randomnumber[min,max] with fitting numbers. "
+      or ""
+
+    local v20 = v1.IAExtraContext ~= "" and "\nExtra instructions: " .. v1.IAExtraContext or ""
+
+    local jsonEncode = httpService:JSONEncode({
+      model = "llama-3.1-8b-instant",
+      messages = {
+        {
+          role = "system",
+          content = string.format(
+            "You write kill-feed chat messages for Roblox. Style: %s. Language: %s. %s%sRules: max one short sentence (~200 chars). CRITICAL: Output ONLY the raw message text. Do NOT wrap the message in any kind of quotes. Do NOT add any preamble, label, or explanation. Just the message itself.%s",
+            v19, v18, iaCiteNames, iaUseRandom, v20
+          ),
+        },
+        {
+          role = "user",
+          content = string.format(
+            "Write one kill message. The player who just died is named %s.",
+            p10.DisplayName or p10.Name
+          ),
+        },
+      },
+      max_tokens = 60,
+      temperature = 0.95,
+    })
+
+    local v21, v22 = pcall(function()
+      return httpService:RequestAsync({
+        Url = "https://api.groq.com/openai/v1/chat/completions",
+        Method = "POST",
+        Headers = {
+          ["Content-Type"] = "application/json",
+          Authorization = "Bearer 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",
+        },
+        Body = jsonEncode,
+      })
+    end)
+
+    local jsonDecode
+
+    if not v21 then
+      fn(nil, "connection error")
+      return
+    elseif not v22.Success then
+      fn(nil, "http " .. v22.StatusCode)
+      return
+    else
+      jsonDecode = nil
+      pcall(function() jsonDecode = httpService:JSONDecode(v22.Body) end)
+
+      local content2 = jsonDecode and jsonDecode.choices and jsonDecode.choices[1]
+        and jsonDecode.choices[1].message and jsonDecode.choices[1].message.content
+
+      if not content2 or content2 == "" then
+        fn(nil, "empty response")
+        return
+      else
+        local sS = content2:match("^%s*(.-)%s*$")
+        fn(sS:match("^[\"'](.+)[\"']$") or sS, nil)
+        return
+      end
+    end
+  end)
+end
+
+local v23 = false
+local v24 = false
+local f17
+local v25, v26
+
+local function f18(p11)
+  if not v24 then
+    return
+  end
+
+  f17()
+  v23 = true
+  v25 = p11
+
+  v26 = task.spawn(function()
+    while v23 do
+      local v27 = v25
+
+      if not v27 or not v27.Parent then
+        f17()
+        break
+      else
+        local character8 = v27.Character
+
+        local humanoid4 = character8
+          and (character8:FindFirstChildOfClass("Humanoid")
+            or character8:FindFirstChild("HumanoidRootPart"))
+
+        if humanoid4 and workspaceService.CurrentCamera.CameraSubject ~= humanoid4 then
+          workspaceService.CurrentCamera.CameraSubject = humanoid4
+        end
+
+        task.wait(0.01)
+      end
+    end
+  end)
+end
+
+function f17()
+  v23 = false
+  v25 = nil
+
+  if v26 then
+    task.cancel(v26)
+    v26 = nil
+  end
+
+  local character9 = localPlayer.Character
+
+  local humanoid5 = character9
+  humanoid5 = character9 and character9:FindFirstChildOfClass("Humanoid")
+
+  if humanoid5 then
+    workspaceService.CurrentCamera.CameraSubject = humanoid5
+  end
+end
+
+local function f19(p12, p13)
+  v24 = p12
+
+  if p12 then
+    if p13 then
+      f18(p13)
+    end
+  else
+    f17()
+  end
+end
+
+local v28 = 16
+local v29 = 50
+local v30 = false
+local v31 = false
+local connect2, f20
+
+local function f21()
+  if connect2 then
+    connect2:Disconnect()
+    connect2 = nil
+  end
+
+  if localPlayer.Character then
+    f20(localPlayer.Character)
+  end
+
+  connect2 = localPlayer.CharacterAdded:Connect(function(character10)
+    task.wait(0.5)
+    f20(character10)
+  end)
+end
+
+function f20(p14)
+  local humanoid6 = p14
+    and (p14:FindFirstChildOfClass("Humanoid") or p14:WaitForChild("Humanoid", 5))
+
+  if not humanoid6 then
+    return
+  end
+
+  if v30 then
+    humanoid6.WalkSpeed = v28
+  end
+
+  if v31 then
+    humanoid6.JumpPower = v29
+  end
+end
+
+local function f22(p15)
+  local v32 = math.random(1, 3)
+
+  if v32 == 1 then
+    return p15:lower()
+  elseif v32 == 2 then
+    return p15:sub(1, 1):upper() .. p15:sub(2):lower()
+  else
+    local lower = p15:lower()
+
+    if #lower > 3 and math.random() < 0.3 then
+      local v33 = math.random(2, #lower - 1)
+
+      local v34 = {
+        a = "s",
+        s = "a",
+        e = "r",
+        r = "e",
+        o = "p",
+        i = "u",
+        u = "i",
+        n = "m",
+        m = "n",
+        l = "k",
+      }
+
+      local sub = lower:sub(v33, v33)
+
+      if v34[sub] then
+        return lower:sub(1, v33 - 1) .. v34[sub] .. lower:sub(v33 + 1)
+      end
+
+      return lower
+    end
+
+    return lower
+  end
+end
+
+local function f23(p16, p17)
+  local gsub = p16:gsub("@user", f22(p17.Name)):gsub(
+    "@displayuser", f22(p17.DisplayName or p17.Name)
+  ):gsub("@randomnumber%[%s*(-?%d+)%s*,%s*(-?%d+)%s*%]", function(p18, p19)
+    local v35 = tonumber(p18)
+    local v36 = tonumber(p19)
+
+    if v35 and v36 then
+      return tostring(math.random(math.min(v35, v36), math.max(v35, v36)))
+    end
+
+    return "@randomnumber[" .. p18 .. "," .. p19 .. "]"
+  end):gsub("@randomnumber", tostring(math.random(
+    0, 100
+  )))
+
+  return gsub:match("^[\"'](.+)[\"']$") or gsub
+end
+
+local v37 = {}
+
+local function f24(p20)
+  if v37[p20.UserId] then
+    return
+  end
+
+  v37[p20.UserId] = true
+
+  local f25
+
+  function f25(p21)
+    local waitForChild = p21:WaitForChild("Humanoid", 10)
+
+    if not waitForChild then
+      return
+    end
+
+    waitForChild.Died:Connect(function()
+      if not v1.KillMsgAtivo then
+        return
+      end
+
+      task.wait(0.3 + math.random() * 0.7)
+
+      if v1.KillMsgIA then
+        f16(p20, function(p22, p23)
+          if p23 or not p22 then
+            if #v1.KillMsgs > 0 then
+              f10(f23(v1.KillMsgs[math.random(1, #v1.KillMsgs)], p20))
+            end
+
+            return
+          end
+
+          f10(f23(p22, p20))
+        end)
+
+        return
+      end
+
+      if #v1.KillMsgs == 0 then
+        return
+      end
+
+      f10(f23(v1.KillMsgs[math.random(1, #v1.KillMsgs)], p20))
+    end)
+  end
+
+  if p20.Character then
+    task.spawn(f25, p20.Character)
+  end
+
+  p20.CharacterAdded:Connect(function(character11) task.spawn(f25, character11) end)
+end
+
+for index7, value12 in ipairs(players:GetPlayers()) do
+  if value12 ~= localPlayer then
+    f24(value12)
+  end
+end
+
+players.PlayerAdded:Connect(function(player)
+  if player ~= localPlayer then
+    f24(player)
+  end
+end)
+
+players.PlayerRemoving:Connect(function(player2) v37[player2.UserId] = nil end)
+
+local v38 = {}
+
+for index8, value13 in ipairs(players:GetPlayers()) do
+  v38[value13.Name] = 0
+end
+
+local playerAdded = players.PlayerAdded
+
+local function f26(p24)
+  local character12 = localPlayer.Character
+  local humanoid7 = character12 and character12:FindFirstChildOfClass("Humanoid")
+  local rootPart = humanoid7 and humanoid7.RootPart
+  local character13 = p24.Character
+  local magnitude, humanoid8, rootPart2, f27
+
+  if not character13 then
+    return false
+  else
+    local handle = nil
+    humanoid8 = nil
+    rootPart2 = nil
+    humanoid8 = character13:FindFirstChildOfClass("Humanoid")
+
+    if humanoid8 and humanoid8.RootPart then
+      rootPart2 = humanoid8.RootPart
+    end
+
+    local head = character13:FindFirstChild("Head")
+    local accessory = character13:FindFirstChildOfClass("Accessory")
+
+    if accessory and accessory:FindFirstChild("Handle") then
+      handle = accessory.Handle
+    end
+
+    if not (character12 and humanoid7 and rootPart) then
+      return false
+    end
+
+    if rootPart.Velocity.Magnitude < 50 then
+      getgenv().OldPos = rootPart.CFrame
+    end
+
+    if humanoid8 and humanoid8.Sit then
+      return false
+    elseif not character13:FindFirstChildWhichIsA("BasePart") then
+      return false
+    else
+      function f27(p25, p26, p27)
+        rootPart.CFrame = CFrame.new(p25.Position) * p26 * p27
+        character12:SetPrimaryPartCFrame(CFrame.new(p25.Position) * p26 * p27)
+
+        rootPart.Velocity = Vector3.new(90000000, 900000000, 90000000)
+        rootPart.RotVelocity = Vector3.new(900000000, 900000000, 900000000)
+      end
+
+      local function f28(p28)
+        local v39 = tick()
+        local total = 0
+
+        if not (p28.Velocity.Magnitude > 500) then
+          if not (p28.Parent ~= character13) then
+            if not (p24.Parent ~= players) then
+              if not humanoid8.Sit then
+                v341 = humanoid7.Health <= 0 or tick() > v39 + 2
+              end
+            end
+          end
+        end
+
+        local sit
+
+        repeat
+          if not (rootPart and humanoid8) then
+            break
+          else
+            if p28.Velocity.Magnitude < 50 then
+              total = total + 100
+
+              f27(
+                p28,
+                CFrame.new(0, 1.5, 0) + humanoid8.MoveDirection * p28.Velocity.Magnitude / 1.25,
+                CFrame.Angles(math.rad(total), 0, 0)
+              )
+
+              task.wait()
+
+              f27(p28, CFrame.new(0, -1.5, 0)
+                + humanoid8.MoveDirection * p28.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(total), 0, 0))
+
+              task.wait()
+
+              f27(p28, CFrame.new(2.25, 1.5, -2.25)
+                + humanoid8.MoveDirection * p28.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(total), 0, 0))
+
+              task.wait()
+
+              f27(p28, CFrame.new(-2.25, -1.5, 2.25)
+                + humanoid8.MoveDirection * p28.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(total), 0, 0))
+
+              task.wait()
+
+              f27(
+                p28, CFrame.new(0, 1.5, 0) + humanoid8.MoveDirection,
+                CFrame.Angles(math.rad(total), 0, 0)
+              )
+
+              task.wait()
+
+              f27(
+                p28, CFrame.new(0, -1.5, 0) + humanoid8.MoveDirection,
+                CFrame.Angles(math.rad(total), 0, 0)
+              )
+
+              task.wait()
+            else
+              f27(
+                p28, CFrame.new(0, 1.5, humanoid8.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0)
+              )
+
+              task.wait()
+              f27(p28, CFrame.new(0, -1.5, -humanoid8.WalkSpeed), CFrame.Angles(0, 0, 0))
+              task.wait()
+
+              f27(
+                p28, CFrame.new(0, 1.5, humanoid8.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0)
+              )
+
+              task.wait()
+
+              f27(
+                p28, CFrame.new(0, 1.5, rootPart2.Velocity.Magnitude / 1.25),
+                CFrame.Angles(math.rad(90), 0, 0)
+              )
+
+              task.wait()
+
+              f27(
+                p28, CFrame.new(0, -1.5, -rootPart2.Velocity.Magnitude / 1.25),
+                CFrame.Angles(0, 0, 0)
+              )
+
+              task.wait()
+
+              f27(
+                p28, CFrame.new(0, 1.5, rootPart2.Velocity.Magnitude / 1.25),
+                CFrame.Angles(math.rad(90), 0, 0)
+              )
+
+              task.wait()
+              f27(p28, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(90), 0, 0))
+              task.wait()
+              f27(p28, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0))
+              task.wait()
+              f27(p28, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(-90), 0, 0))
+              task.wait()
+              f27(p28, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0))
+              task.wait()
+            end
+
+
+
+            local v40 = p28.Velocity.Magnitude > 500
+
+            sit = v40
+
+            sit = v40 or p28.Parent ~= character13 or p24.Parent ~= players or humanoid8.Sit
+              or humanoid7.Health <= 0 or tick() > v39 + 2
+          end
+        until sit
+      end
+
+      workspace.FallenPartsDestroyHeight = (0 / 0)
+
+      local epixVel = Instance.new("BodyVelocity")
+      epixVel.Name = "EpixVel"
+      epixVel.Parent = rootPart
+      epixVel.Velocity = Vector3.new(900000000, 900000000, 900000000)
+      epixVel.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+
+      humanoid7:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+
+      if rootPart2 and head then
+        if (rootPart2.CFrame.p - head.CFrame.p).Magnitude > 5 then
+          f28(head)
+        else
+          f28(rootPart2)
+        end
+
+        epixVel:Destroy()
+        humanoid7:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+        magnitude = (rootPart.Position - getgenv().OldPos.p).Magnitude
+
+        repeat
+          rootPart.CFrame = getgenv().OldPos * CFrame.new(0, 0.5, 0)
+          character12:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, 0.5, 0))
+          humanoid7:ChangeState("GettingUp")
+
+          for index9, value14 in ipairs(character12:GetChildren()) do
+            if value14:IsA("BasePart") then
+              value14.Velocity = Vector3.new()
+              value14.RotVelocity = Vector3.new()
+            end
+          end
+
+          task.wait()
+        until (rootPart.Position - getgenv().OldPos.p).Magnitude < 25
+
+        workspace.FallenPartsDestroyHeight = getgenv().FPDH
+        return true
+      elseif rootPart2 then
+        f28(rootPart2)
+        epixVel:Destroy()
+        humanoid7:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+        magnitude = (rootPart.Position - getgenv().OldPos.p).Magnitude
+
+        repeat
+          rootPart.CFrame = getgenv().OldPos * CFrame.new(0, 0.5, 0)
+          character12:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, 0.5, 0))
+          humanoid7:ChangeState("GettingUp")
+
+          for index10, value15 in ipairs(character12:GetChildren()) do
+            if value15:IsA("BasePart") then
+              value15.Velocity = Vector3.new()
+              value15.RotVelocity = Vector3.new()
+            end
+          end
+
+          task.wait()
+        until (rootPart.Position - getgenv().OldPos.p).Magnitude < 25
+
+        workspace.FallenPartsDestroyHeight = getgenv().FPDH
+        return true
+      elseif head then
+        f28(head)
+        epixVel:Destroy()
+        humanoid7:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+        magnitude = (rootPart.Position - getgenv().OldPos.p).Magnitude
+
+        repeat
+          rootPart.CFrame = getgenv().OldPos * CFrame.new(0, 0.5, 0)
+          character12:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, 0.5, 0))
+          humanoid7:ChangeState("GettingUp")
+
+          for index11, value16 in ipairs(character12:GetChildren()) do
+            if value16:IsA("BasePart") then
+              value16.Velocity = Vector3.new()
+              value16.RotVelocity = Vector3.new()
+            end
+          end
+
+          task.wait()
+        until (rootPart.Position - getgenv().OldPos.p).Magnitude < 25
+
+        workspace.FallenPartsDestroyHeight = getgenv().FPDH
+        return true
+      else
+        if handle then
+          f28(handle)
+          epixVel:Destroy()
+          humanoid7:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+          magnitude = (rootPart.Position - getgenv().OldPos.p).Magnitude
+
+          repeat
+            rootPart.CFrame = getgenv().OldPos * CFrame.new(0, 0.5, 0)
+            character12:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, 0.5, 0))
+            humanoid7:ChangeState("GettingUp")
+
+            for index12, value17 in ipairs(character12:GetChildren()) do
+              if value17:IsA("BasePart") then
+                value17.Velocity = Vector3.new()
+                value17.RotVelocity = Vector3.new()
+              end
+            end
+
+            task.wait()
+          until (rootPart.Position - getgenv().OldPos.p).Magnitude < 25
+
+          workspace.FallenPartsDestroyHeight = getgenv().FPDH
+          return true
+        end
+
+        epixVel:Destroy()
+        return false
+      end
+    end
+  end
+end
+
+local function f29(p29)
+  if not v1.ProtectNew then
+    return false
+  end
+
+  return v38[p29] and v38[p29] > 0
+end
+
+playerAdded:Connect(function(p30) v38[p30.Name] = tick() end)
+
+local function f30(p31)
+  local v41
+
+  if not v1.ProtectFriends then
+    return false
+  else
+    local v42
+    v42, v41 = pcall(function() return players:GetUserIdFromNameAsync(p31) end)
+
+    if not v42 then
+      return false
+    else
+      local v43, v44 = pcall(function() return localPlayer:IsFriendsWith(v41) end)
+      return v43 and v44 == true
+    end
+  end
+end
+
+local function f31(p32)
+  return v1.Whitelist[p32] == true or f30(p32)
+end
+
+local connect3 = nil
+
+local function f32()
+  if connect3 then
+    connect3:Disconnect()
+    connect3 = nil
+  end
+
+  v1.FlingEnabled = false
+  v1.FlingMode = "off"
+
+  f6("fling", false)
+end
+
+local function f33()
+  local v45 = {}
+
+  for index13, value18 in ipairs(players:GetPlayers()) do
+    if value18 ~= localPlayer and not f31(value18.Name) and not f29(value18.Name)
+      and value18.Character then
+      local humanoid9 = value18.Character:FindFirstChildOfClass("Humanoid")
+
+      if humanoid9 and humanoid9.RootPart and humanoid9.Health > 0 then
+        table.insert(v45, value18)
+      end
+    end
+  end
+
+  return v45
+end
+
+local function f34()
+  f32()
+
+  v1.FlingEnabled = true
+  v1.FlingMode = "all"
+  v1.CurrentIndex = 1
+  v1.StartTime = nil
+
+  f6("fling", true)
+
+  connect3 = runService.Heartbeat:Connect(function()
+    if not v1.FlingEnabled then
+      return
+    else
+      local v46 = f33()
+
+      if #v46 == 0 then
+        return
+      end
+
+      if v1.CurrentIndex > #v46 then
+        v1.CurrentIndex = 1
+      end
+
+      if not v1.StartTime then
+        v1.StartTime = tick()
+      end
+
+      if tick() - v1.StartTime >= v1.MaxTime then
+        v1.CurrentIndex = v1.CurrentIndex + 1
+        v1.StartTime = nil
+        return
+      end
+
+      if pcall(f26, v46[v1.CurrentIndex]) then
+        v1.CurrentIndex = v1.CurrentIndex + 1
+        v1.StartTime = nil
+      end
+
+      return
+    end
+  end)
+end
+
+local function f35()
+  local v47 = {}
+
+  for index14, value19 in ipairs(players:GetPlayers()) do
+    if value19 ~= localPlayer and v1.SpecificTargets[value19.Name] and not f31(value19.Name)
+      and value19.Character then
+      local humanoid10 = value19.Character:FindFirstChildOfClass("Humanoid")
+
+      if humanoid10 and humanoid10.RootPart and humanoid10.Health > 0 then
+        table.insert(v47, value19)
+      end
+    end
+  end
+
+  return v47
+end
+
+local f36
+
+local function f37()
+  local newMessage = ""
+  local label
+
+  local function f38()
+    if not label then
+      return
+    end
+
+    if #v1.KillMsgs == 0 then
+      label:Set("No messages added yet.")
+    else
+      local v48 = {}
+
+      for index15, value20 in ipairs(v1.KillMsgs) do
+        table.insert(v48, index15 .. ". " .. value20)
+      end
+
+      label:Set(table.concat(v48, "\n"))
+    end
+  end
+
+  local selectTargetsDropdown, dropdown, dropdown2
+
+  local function f39()
+    local v49 = f3()
+
+    if selectTargetsDropdown then
+      pcall(function() selectTargetsDropdown:Refresh(v49) end)
+    end
+
+    if dropdown then
+      pcall(function() dropdown:Refresh(v49) end)
+    end
+
+    if dropdown2 then
+      pcall(function() dropdown2:Refresh(v49) end)
+    end
+  end
+
+  local toggle, toggle2
+
+  local function f40()
+    f32()
+
+    if toggle then
+      pcall(function() toggle:Set(false) end)
+    end
+
+    if toggle2 then
+      pcall(function() toggle2:Set(false) end)
+    end
+  end
+
+  local autoFlingWindow = rayfield:CreateWindow({
+    Name = "Auto Fling",
+    Icon = "rocket",
+    LoadingTitle = "Monk V2 FLING",
+    LoadingSubtitle = "Loading...",
+    Theme = theme,
+    ToggleUIKeybind = "K",
+    DisableRayfieldPrompts = true,
+    DisableBuildWarnings = true,
+    ConfigurationSaving = { Enabled = false },
+    Discord = { Enabled = false },
+    KeySystem = false,
+  })
+
+  local flingTab = autoFlingWindow:CreateTab("Fling", "zap")
+  flingTab:CreateSection("Auto Fling — All Players")
+  flingTab:CreateLabel("Loops through every player in the server.", "users")
+
+  toggle = flingTab:CreateToggle({
+    Name = "Fling All Players",
+    CurrentValue = false,
+    Flag = "FlingAll",
+    Callback = function(value21)
+      if value21 then
+        if toggle2 then
+          pcall(function() toggle2:Set(false) end)
+        end
+
+        f34()
+        f2("Fling", "Fling All ON.", "play")
+      else
+        f32()
+        f2("Fling", "Fling stopped.", "square")
+      end
+    end,
+  })
+
+  flingTab:CreateToggle({
+    Name = "Protect New Players",
+    CurrentValue = v1.ProtectNew,
+    Flag = "ProtectNew",
+    Callback = function(value22)
+      v1.ProtectNew = value22
+
+      f2(
+        "Fling", value22 and "New player protection ON." or "New player protection OFF.",
+        "shield"
+      )
+    end,
+  })
+
+  flingTab:CreateLabel("Players who joined after the script loaded won't be flung.", "info")
+  flingTab:CreateDivider()
+  flingTab:CreateSection("Specific Targets")
+  flingTab:CreateLabel("Select one or more players to fling exclusively.", "crosshair")
+
+  selectTargetsDropdown = flingTab:CreateDropdown({
+    Name = "Select Targets",
+    Options = f3(),
+    CurrentOption = {},
+    MultipleOptions = true,
+    Flag = "SpecificTargetsDrop",
+    Callback = function(value23)
+      v1.SpecificTargets = {}
+
+      if type(value23) == "table" then
+        for index16, value24 in ipairs(value23) do
+          if value24 ~= "(no players)" then
+            v1.SpecificTargets[value24] = true
+          end
+        end
+      end
+    end,
+  })
+
+  toggle2 = flingTab:CreateToggle({
+    Name = "Fling Selected Targets",
+    CurrentValue = false,
+    Flag = "FlingSpecific",
+    Callback = function(value25)
+      if value25 then
+        if next(v1.SpecificTargets) == nil then
+          f2("Fling", "Select at least one target first.", "alert-circle")
+          pcall(function() toggle2:Set(false) end)
+          return
+        end
+
+        if toggle then
+          pcall(function() toggle:Set(false) end)
+        end
+
+        f36()
+        f2("Fling", "Fling Specific Targets ON.", "play")
+        return
+      end
+
+      f32()
+      f2("Fling", "Fling stopped.", "square")
+    end,
+  })
+
+  flingTab:CreateButton({
+    Name = "Stop Fling",
+    Callback = function()
+      f40()
+      f2("Fling", "Fling stopped.", "square")
+    end,
+  })
+
+  flingTab:CreateDivider()
+  flingTab:CreateSection("View")
+  flingTab:CreateLabel("Lock camera on a player. Persists after respawn.", "eye")
+
+  local viewTarget
+
+  dropdown2 = flingTab:CreateDropdown({
+    Name = "Select Player to View",
+    Options = f3(),
+    CurrentOption = {},
+    MultipleOptions = false,
+    Flag = "ViewTarget",
+    Callback = function(value26)
+      local v50 = f1(value26)
+
+      if v50 and v50 ~= "(no players)" then
+        local findFirstChild2 = players:FindFirstChild(v50)
+        viewTarget = findFirstChild2
+
+        if v24 and findFirstChild2 then
+          f18(findFirstChild2)
+          f2("View", "Now viewing: " .. v50, "eye")
+        end
+      end
+    end,
+  })
+
+  flingTab:CreateToggle({
+    Name = "Enable View",
+    CurrentValue = false,
+    Flag = "ViewToggle",
+    Callback = function(value27)
+      if value27 then
+        if not viewTarget then
+          f2("View", "Select a player first.", "alert-circle")
+          pcall(function() rayfield.Flags.ViewToggle:Set(false) end)
+          return
+        end
+
+        f19(true, viewTarget)
+        f2("View", "View ON: " .. viewTarget.Name, "eye")
+        return
+      end
+
+      f19(false, nil)
+      f2("View", "View OFF.", "eye-off")
+    end,
+  })
+
+  flingTab:CreateButton({
+    Name = "Refresh Dropdowns",
+    Callback = function()
+      f39()
+      f2("Fling", "Dropdowns refreshed.", "refresh-cw")
+    end,
+  })
+
+  local whitelistTab = autoFlingWindow:CreateTab("Whitelist", "shield")
+  whitelistTab:CreateSection("Whitelist")
+  whitelistTab:CreateLabel("These players will be skipped by the fling.", "info")
+
+  whitelistTab:CreateToggle({
+    Name = "Protect Friends",
+    CurrentValue = v1.ProtectFriends,
+    Flag = "ProtectFriends",
+    Callback = function(value28)
+      v1.ProtectFriends = value28
+      f2("Whitelist", value28 and "Friend protection ON." or "Friend protection OFF.", "users")
+    end,
+  })
+
+  whitelistTab:CreateLabel("Automatically skips all your Roblox friends.", "info")
+  whitelistTab:CreateDivider()
+
+  dropdown = whitelistTab:CreateDropdown({
+    Name = "Select Players to Protect",
+    Options = f3(),
+    CurrentOption = {},
+    MultipleOptions = true,
+    Flag = "WLDrop",
+    Callback = function(value29)
+      v1.Whitelist = {}
+
+      if type(value29) == "table" then
+        for index17, value30 in ipairs(value29) do
+          if value30 ~= "(no players)" then
+            v1.Whitelist[value30] = true
+          end
+        end
+      end
+    end,
+  })
+
+  whitelistTab:CreateButton({
+    Name = "Refresh List",
+    Callback = function()
+      f39()
+      f2("Whitelist", "List refreshed.", "refresh-cw")
+    end,
+  })
+
+  local killMsgsTab = autoFlingWindow:CreateTab("Kill Msgs", "message-circle")
+  killMsgsTab:CreateSection("Kill Messages")
+
+  killMsgsTab:CreateLabel(
+    "Sent in chat when someone dies.\nVariables: @user  @displayuser  @randomnumber[min,max]",
+    "info"
+  )
+
+  killMsgsTab:CreateToggle({
+    Name = "Enable Kill Messages",
+    CurrentValue = v1.KillMsgAtivo,
+    Flag = "KillMsgToggle",
+    Callback = function(value31)
+      v1.KillMsgAtivo = value31
+
+      f2(
+        "Kill Messages", value31 and "Kill messages ON." or "Kill messages OFF.",
+        "message-circle"
+      )
+    end,
+  })
+
+  killMsgsTab:CreateDivider()
+  killMsgsTab:CreateSection("AI Mode")
+  killMsgsTab:CreateLabel("Powered by AI — unique message every kill.", "cpu")
+
+  killMsgsTab:CreateToggle({
+    Name = "Use AI Messages",
+    Info = "Generates a unique message via AI. Falls back to manual list if AI fails.",
+    CurrentValue = v1.KillMsgIA,
+    Flag = "KillMsgIA",
+    Callback = function(value32)
+      v1.KillMsgIA = value32
+
+      if value32 and false then
+        f2("AI", "Paste your API key in AI_KEY at the top.", "alert-circle")
+      end
+    end,
+  })
+
+  killMsgsTab:CreateDropdown({
+    Name = "Message Style",
+    Options = { "funny", "aggressive", "humiliating", "epic", "friendly" },
+    CurrentOption = { v1.IAStyle },
+    MultipleOptions = false,
+    Flag = "IAStyle",
+    Callback = function(value33)
+      local v51 = f1(value33)
+
+      if v51 and v51 ~= "" then
+        v1.IAStyle = v51
+      end
+    end,
+  })
+
+  killMsgsTab:CreateDropdown({
+    Name = "Language",
+    Options = { "English", "Portuguese", "Spanish", "French", "German", "Japanese", "Chinese" },
+    CurrentOption = { v1.IALang },
+    MultipleOptions = false,
+    Flag = "IALang",
+    Callback = function(value34)
+      local v52 = f1(value34)
+
+      if v52 and v52 ~= "" then
+        v1.IALang = v52
+      end
+    end,
+  })
+
+  killMsgsTab:CreateToggle({
+    Name = "Mention Player Names",
+    Info = "AI references the victim's name via @user / @displayuser.",
+    CurrentValue = v1.IACiteNames,
+    Flag = "IACiteNames",
+    Callback = function(value35) v1.IACiteNames = value35 end,
+  })
+
+  killMsgsTab:CreateToggle({
+    Name = "Include Random Number",
+    Info = "AI inserts @randomnumber[min,max] somewhere in the message.",
+    CurrentValue = v1.IAUseRandom,
+    Flag = "IAUseRandom",
+    Callback = function(value36) v1.IAUseRandom = value36 end,
+  })
+
+  killMsgsTab:CreateInput({
+    Name = "Extra AI Instructions",
+    PlaceholderText = "e.g. always end with lol...",
+    RemoveTextAfterFocusLost = false,
+    Flag = "IAExtraContext",
+    Callback = function(value37) v1.IAExtraContext = value37 end,
+  })
+
+  killMsgsTab:CreateDivider()
+  killMsgsTab:CreateSection("Manual Messages")
+
+  killMsgsTab:CreateInput({
+    Name = "New Message",
+    CurrentValue = "",
+    PlaceholderText = "e.g: rip @user, you got @randomnumber[1,100] skill",
+    RemoveTextAfterFocusLost = false,
+    Flag = "KMInput",
+    Callback = function(value38) newMessage = value38 end,
+  })
+
+  killMsgsTab:CreateButton({
+    Name = "Add Message",
+    Callback = function()
+      if newMessage and newMessage ~= "" then
+        table.insert(v1.KillMsgs, newMessage)
+        f38()
+        f2("Kill Messages", "Message added.", "plus")
+      else
+        f2("Kill Messages", "Type a message first.", "alert-circle")
+      end
+    end,
+  })
+
+  killMsgsTab:CreateButton({
+    Name = "Delete Last Message",
+    Callback = function()
+      if #v1.KillMsgs > 0 then
+        table.remove(v1.KillMsgs, #v1.KillMsgs)
+        f38()
+        f2("Kill Messages", "Last message removed.", "trash-2")
+      else
+        f2("Kill Messages", "No messages to remove.", "alert-circle")
+      end
+    end,
+  })
+
+  killMsgsTab:CreateButton({
+    Name = "Clear All Messages",
+    Callback = function()
+      v1.KillMsgs = {}
+      f38()
+      f2("Kill Messages", "All messages cleared.", "trash-2")
+    end,
+  })
+
+  killMsgsTab:CreateDivider()
+
+  label = killMsgsTab:CreateLabel("No messages added yet.", "list")
+
+  local extrasTab = autoFlingWindow:CreateTab("Extras", "settings")
+  extrasTab:CreateSection("God Mode")
+  extrasTab:CreateLabel("Manually enable god mode, independent from fling.", "shield")
+
+  extrasTab:CreateToggle({
+    Name = "Enable God Mode",
+    CurrentValue = v1.ManualGod,
+    Flag = "ManualGodToggle",
+    Callback = function(value39)
+      v1.ManualGod = value39
+      f6("manual", value39)
+      f2("God Mode", value39 and "God Mode ON." or "God Mode OFF.", "shield")
+    end,
+  })
+
+  extrasTab:CreateDivider()
+  extrasTab:CreateSection("Antis & Protections")
+  extrasTab:CreateLabel("Extra protections running in background.", "lock")
+
+  extrasTab:CreateToggle({
+    Name = "Ultra God",
+    Info = "Locks health at 100 and disables the dead state continuously.",
+    CurrentValue = v1.AntiGod,
+    Flag = "AntiGod",
+    Callback = function(value40)
+      v1.AntiGod = value40
+      f2("Antis", value40 and "Ultra God ON." or "Ultra God OFF.", "shield")
+    end,
+  })
+
+  extrasTab:CreateToggle({
+    Name = "Anti-Sit",
+    Info = "Prevents your character from being forced into a sitting state.",
+    CurrentValue = v1.AntiSit,
+    Flag = "AntiSit",
+    Callback = function(value41)
+      v1.AntiSit = value41
+      f2("Antis", value41 and "Anti-Sit ON." or "Anti-Sit OFF.", "shield")
+    end,
+  })
+
+  extrasTab:CreateToggle({
+    Name = "No-Collide",
+    Info = "Disables collision on all your character parts every frame.",
+    CurrentValue = v1.NoCollide,
+    Flag = "NoCollide",
+    Callback = function(value42)
+      v1.NoCollide = value42
+
+      if not value42 and localPlayer.Character then
+        for key6, value43 in pairs(localPlayer.Character:GetDescendants()) do
+          local v53 = value43
+
+          if v53:IsA("BasePart") then
+            pcall(function() v53.CanCollide = true end)
+          end
+        end
+      end
+
+      f2("Antis", value42 and "No-Collide ON." or "No-Collide OFF.", "shield")
+    end,
+  })
+
+  extrasTab:CreateToggle({
+    Name = "Anti-Fling",
+    Info = "Disables CanCollide on all other players' parts so they cannot fling you.",
+    CurrentValue = v1.AntiFling,
+    Flag = "AntiFling",
+    Callback = function(value44)
+      v1.AntiFling = value44
+      f2("Antis", value44 and "Anti-Fling ON." or "Anti-Fling OFF.", "shield")
+    end,
+  })
+
+  extrasTab:CreateDivider()
+  extrasTab:CreateSection("Tornado")
+  extrasTab:CreateLabel("Pulls nearby parts toward you.", "wind")
+
+  extrasTab:CreateToggle({
+    Name = "Enable Tornado",
+    CurrentValue = enableTornado,
+    Flag = "TornadoToggle",
+    Callback = function(value45)
+      enableTornado = value45
+      f2("Tornado", value45 and "Tornado ON." or "Tornado OFF.", "wind")
+    end,
+  })
+
+  extrasTab:CreateDivider()
+  extrasTab:CreateSection("Noob All")
+
+  extrasTab:CreateLabel(
+    "Turns every player into a noob skin in a loop.\nFling may break after — rejoin if needed.",
+    "alert-triangle"
+  )
+
+  extrasTab:CreateToggle({
+    Name = "Enable Noob All",
+    CurrentValue = v7,
+    Flag = "NoobLoop",
+    Callback = function(value46)
+      if value46 then
+        f13()
+        f2("Noob All", "Loop started.", "alert-triangle")
+      else
+        f14()
+        f2("Noob All", "Loop stopped.", "square")
+      end
+    end,
+  })
+
+  extrasTab:CreateDivider()
+  extrasTab:CreateSection("Movement")
+
+  extrasTab:CreateLabel(
+    "Toggle to enable. Slider defines the value. Persists after respawn.", "activity"
+  )
+
+  extrasTab:CreateToggle({
+    Name = "Walk Speed",
+    CurrentValue = v30,
+    Flag = "SpeedToggle",
+    Callback = function(value47)
+      v30 = value47
+
+      if value47 then
+        f21()
+        f2("Movement", "Walk Speed ON: " .. v28 .. " WS", "zap")
+      else
+        local humanoid11 = localPlayer.Character
+          and localPlayer.Character:FindFirstChildOfClass("Humanoid")
+
+        if humanoid11 then
+          humanoid11.WalkSpeed = 16
+        end
+
+        f2("Movement", "Walk Speed OFF.", "zap-off")
+      end
+    end,
+  })
+
+  extrasTab:CreateSlider({
+    Name = "Walk Speed Value",
+    Range = { 16, 500 },
+    Increment = 1,
+    Suffix = " WS",
+    CurrentValue = v28,
+    Flag = "WalkSpeed",
+    Callback = function(value48)
+      v28 = value48
+
+      if v30 then
+        local humanoid12 = localPlayer.Character
+          and localPlayer.Character:FindFirstChildOfClass("Humanoid")
+
+        if humanoid12 then
+          humanoid12.WalkSpeed = value48
+        end
+      end
+    end,
+  })
+
+  extrasTab:CreateToggle({
+    Name = "Jump Power",
+    CurrentValue = v31,
+    Flag = "JumpToggle",
+    Callback = function(value49)
+      v31 = value49
+
+      if value49 then
+        f21()
+        f2("Movement", "Jump Power ON: " .. v29 .. " JP", "chevrons-up")
+      else
+        local humanoid13 = localPlayer.Character
+          and localPlayer.Character:FindFirstChildOfClass("Humanoid")
+
+        if humanoid13 then
+          humanoid13.JumpPower = 50
+        end
+
+        f2("Movement", "Jump Power OFF.", "chevrons-down")
+      end
+    end,
+  })
+
+  extrasTab:CreateSlider({
+    Name = "Jump Power Value",
+    Range = { 50, 500 },
+    Increment = 5,
+    Suffix = " JP",
+    CurrentValue = v29,
+    Flag = "JumpPower",
+    Callback = function(value50)
+      v29 = value50
+
+      if v31 then
+        local humanoid14 = localPlayer.Character
+          and localPlayer.Character:FindFirstChildOfClass("Humanoid")
+
+        if humanoid14 then
+          humanoid14.JumpPower = value50
+        end
+      end
+    end,
+  })
+
+  extrasTab:CreateButton({
+    Name = "Reset Speed & Jump",
+    Callback = function()
+      v28 = 16
+      v29 = 50
+      v30 = false
+      v31 = false
+      pcall(function() rayfield.Flags.JumpToggle:Set(false) end)
+
+      local humanoid15 = localPlayer.Character
+        and localPlayer.Character:FindFirstChildOfClass("Humanoid")
+
+      if humanoid15 then
+        humanoid15.WalkSpeed = 16
+        humanoid15.JumpPower = 50
+      end
+
+      f2("Movement", "Reset to defaults.", "refresh-cw")
+    end,
+  })
+
+  players.PlayerAdded:Connect(function(player3)
+    v38[player3.Name] = tick()
+    task.wait(0.8)
+    f39()
+  end)
+
+  players.PlayerRemoving:Connect(function(player4)
+    v1.Whitelist[player4.Name] = nil
+    v1.SpecificTargets[player4.Name] = nil
+
+    v38[player4.Name] = nil
+    v37[player4.UserId] = nil
+
+    if v25 and v25 == player4 then
+      f17()
+      v24 = false
+      pcall(function() rayfield.Flags.ViewToggle:Set(false) end)
+    end
+
+    task.wait(0.8)
+    f39()
+  end)
+
+  localPlayer.CharacterAdded:Connect(function()
+    task.wait(1)
+
+    if v1.FlingEnabled then
+      v1.StartTime = nil
+    end
+  end)
+
+  f2("Auto Fling", "Loaded! Press K to toggle UI. YouTube: @SUPERMONKXSCRIPTS", "MONK")
+end
+
+function f36()
+  f32()
+
+  v1.FlingEnabled = true
+  v1.FlingMode = "specific"
+  v1.CurrentIndex = 1
+  v1.StartTime = nil
+
+  f6("fling", true)
+
+  connect3 = runService.Heartbeat:Connect(function()
+    if not v1.FlingEnabled then
+      return
+    else
+      local v54 = f35()
+
+      if #v54 == 0 then
+        return
+      end
+
+      if v1.CurrentIndex > #v54 then
+        v1.CurrentIndex = 1
+      end
+
+      if not v1.StartTime then
+        v1.StartTime = tick()
+      end
+
+      if tick() - v1.StartTime >= v1.MaxTime then
+        v1.CurrentIndex = v1.CurrentIndex + 1
+        v1.StartTime = nil
+        return
+      end
+
+      if pcall(f26, v54[v1.CurrentIndex]) then
+        v1.CurrentIndex = v1.CurrentIndex + 1
+        v1.StartTime = nil
+      end
+
+      return
+    end
+  end)
+end
+
+f37()
