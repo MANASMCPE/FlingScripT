@@ -1278,7 +1278,7 @@ local function f37()
   end
 
   local autoFlingWindow = rayfield:CreateWindow({
-    Name = "Auto Fling",
+    Name = "MonK Fling",
     Icon = "rocket",
     LoadingTitle = "Monk V2 FLING",
     LoadingSubtitle = "Loading...",
